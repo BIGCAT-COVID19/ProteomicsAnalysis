@@ -1,0 +1,12 @@
+id,name,difference,
+WP690,Polyol pathway,-0.198417752810016,
+WP691,Tamoxifen metabolism,-0.151106253698535,This pathway is for cancer patients
+WP206,Fatty acid omega-oxidation,-0.113066540055301,
+WP678,Arachidonate epoxygenase / epoxide hydrolase,-0.136348627427585,
+WP4720,Eicosanoid metabolism via cytochrome P450 monooxygenases (CYP) pathway,-0.113223667758174,
+WP694,Arylamine metabolism,-0.106680286536611,metabolism of aflatoxins – not relevant
+WP699,Aflatoxin B1 metabolism,-0.116388798219687,
+WP2485,NAD biosynthesis II (from tryptophan),-0.105844043452525,
+WP4518,"Gamma-glutamyl cycle for the biosynthesis and degradation of glutathione, including diseases",-0.107766396606559,
+WP5066,FOXA2 pathway,-0.113186082624515,
+WP4586,Metabolism of alpha-linolenic acid,0.144669811994299,
