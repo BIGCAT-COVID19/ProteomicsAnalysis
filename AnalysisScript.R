@@ -144,7 +144,7 @@ difference_tol[1:10,]
 cut_off <- 0.1
 active_table <- data.frame() 
 for (i in 1: length(tissue_df$tissue)){
-  index <- which(difference_tol[,i+1] > cut_off)
+  index <- which(as.numeric(difference_tol[,i+1]) > cut_off)
   if (!is_empty(index)){
   up <- difference_tol[index,1]
   print(tissue_df$tissue[i])
@@ -266,6 +266,17 @@ hm.colors = c(gradient1, gradient2, gradient3, gradient4)
 
 heatmap.2(mtrx, na.color = 'grey', distfun = dist_no_na, col= hm.colors, breaks = breaks, trace = "none")
 
+## Inspect heat map cluster
+
+top_right <- c(42,21,26,19,8,17,1,43,32,18,40,39,14,44,11,38,34,15)
+bottom <- c(36,27,13,7,25,20,41,30,28,16,23,29,35,31,37)
+
+top_red <- all_active_p$wpid[top_right]
+up_group <- filter(all_pathway,wpid %in% top_red)
+unique(up_group$name)
+bottom_blue <- all_active_p$wpid[bottom]
+down_blue <- filter(all_pathway,wpid %in%bottom_blue)
+unique(down_blue$name)
 
 ## rank overlap degree
 active_list$rank <- rowSums(!is.na(active_list[,2:8]))
@@ -318,7 +329,7 @@ for (i in 1: length(tissue_df$tissue)){
   RCy3::commandsRun(paste('wikipathways import-as-pathway id=', pathway_to_check)) 
   toggleGraphicsDetails()
   loadTableData(pathway_data, data.key.column = "ENSEMBL", table.key.column = "Ensembl")
- write_csv(pathway_data,paste(gsub(" ","", paste("Figs/", tissue_df$tissue[i], "/")),date(),pathway_to_check, tissue_df$tissue[i], ".csv"))
+ # write_csv(pathway_data,paste(gsub(" ","", paste("Figs/", tissue_df$tissue[i], "/")),date(),pathway_to_check, tissue_df$tissue[i], ".csv"))
   # setNodeLabelMapping("SYMBOL")
   # heatmap_colors <- c('red', 'yellow', 'blue','grey')
   # setNodeCustomHeatMapChart(check_columns, data.values, node.colors, zeroLine = TRUE,
@@ -370,8 +381,6 @@ testi <- c(21,22,23)
 thyroid <- c(24,25,26) 
 
 
-tissue_col <- thyroid
-
 ## check number of proteins measured per pathway and number of protein that are up and down per pathway
 
 
@@ -408,9 +417,10 @@ inspect_pathway <- function(pathway_to_check, tissue, tissue_col){
   print(sig_gene_names)
   }
 
-pathway_to_check <- "WP4586"
-tissue <- 3
-tissue_col <- liver
+pathway_to_check <- "WP3891"
+all_pathway$name[which(all_pathway$wpid == pathway_to_check)][1]
+tissue <- 2
+tissue_col <- spleen
 inspect_pathway(pathway_to_check, tissue, tissue_col)
 
 ## All significant proteins that are not in wikipathways and DM collection
@@ -464,3 +474,9 @@ testi_p_data <- filter(all_pathway,wpid %in% testi_p)
 index <- !is.na(testi_p_data$Uniprot.ID)
 testi_node_list <- data.frame(testi_p_data$Uniprot.ID[index], testi_p_data$wpid[index])
 write_csv(testi_node_list, "Results/testi_node_list")
+
+# print out pathway to group them 
+active_p <- filter(all_pathway,wpid %in% active_list$wpid)
+active_p <- data.frame(active_p$wpid, active_p$name)
+active_p <- unique(active_p)
+write_csv(active_p,"Results/all_changed_pathways")
