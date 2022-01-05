@@ -417,10 +417,10 @@ inspect_pathway <- function(pathway_to_check, tissue, tissue_col){
   print(sig_gene_names)
   }
 
-pathway_to_check <- "WP3891"
+pathway_to_check <- "WP3599"
 all_pathway$name[which(all_pathway$wpid == pathway_to_check)][1]
-tissue <- 2
-tissue_col <- spleen
+tissue <- 3
+tissue_col <- liver
 inspect_pathway(pathway_to_check, tissue, tissue_col)
 
 ## All significant proteins that are not in wikipathways and DM collection
@@ -480,3 +480,45 @@ active_p <- filter(all_pathway,wpid %in% active_list$wpid)
 active_p <- data.frame(active_p$wpid, active_p$name)
 active_p <- unique(active_p)
 write_csv(active_p,"Results/all_changed_pathways")
+
+# Check pathways of intestest
+gene <- "IL6ST"
+dif_data[which(dif_data$Gene.name == gene),] 
+index <- which(all_pathway$Gene.name == gene)
+all_pathway[index,]
+filter(difference,pathway_median...1.%in% all_pathway[index,15])
+
+pathway_to_check <- "WP5063"
+all_pathway$name[which(all_pathway$wpid == pathway_to_check)][1]
+filter(difference,pathway_median...1.%in% pathway_to_check)
+i<- 1
+tissue_col <- lung
+inspect_pathway(pathway_to_check, i, tissue_col)
+
+pathway_data <- data.frame(all_pathway[which(all_pathway$wpid == pathway_to_check),],
+                           NC_all_pathway[which(NC_all_pathway$wpid == pathway_to_check),])
+ggplot(data = pathway_data, aes(x = Gene.name)) +
+  geom_point(aes(y = liver))  + geom_point(aes(y = liver.1), color = "red")
++ labs(title = "Protein abundant")
+
+
+
+
+
+tissue_data <- data.frame(pathway_data[,1:3], pathway_data[,(i+3)],pathway_data[,11:19], pathway_data[,(i+19)], pathway_data[,27:31])
+data.frame(tissue_data$liver, tissue_data$liver.1)
+check_columns <- c(tissue_df$tissue[i],gsub(" ","",paste(tissue_df$tissue[i], ".1")))
+colnames(tissue_data)[4] <- check_columns[1]
+colnames(tissue_data)[14] <- check_columns[2]
+RCy3::commandsRun(paste('wikipathways import-as-pathway id=', pathway_to_check)) 
+toggleGraphicsDetails()
+loadTableData(pathway_data, data.key.column = "ENSEMBL", table.key.column = "Ensembl")
+setNodeCustomBarChart(check_columns, type = "GROUPED", colors = c("red","blue"), orientation = "HORIZONTAL", style.name = "WikiPathways")
+# Saving output
+path <- gsub(" ","",paste("Figs/",tissue_df$tissue[i]))
+dir.create(path)
+filename <- gsub(" ","",paste(path, "/",pathway_to_check))
+exportImage(filename,'SVG')
+exportImage(filename,'PNG', zoom = 500)
+saveSession(filename) 
+
