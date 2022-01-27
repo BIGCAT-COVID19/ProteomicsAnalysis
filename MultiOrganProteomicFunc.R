@@ -441,3 +441,71 @@ dist_no_na <- function(mat) {
   edist[which(is.na(edist))] <- max(edist, na.rm=TRUE) * 1.1 
   return(edist)
 }
+
+
+#########################################################
+# For violin plot
+GeomSplitViolin <- ggproto("GeomSplitViolin", GeomViolin, 
+                           draw_group = function(self, data, ..., draw_quantiles = NULL) {
+                             data <- transform(data, xminv = x - violinwidth * (x - xmin), xmaxv = x + violinwidth * (xmax - x))
+                             grp <- data[1, "group"]
+                             newdata <- plyr::arrange(transform(data, x = if (grp %% 2 == 1) xminv else xmaxv), if (grp %% 2 == 1) y else -y)
+                             newdata <- rbind(newdata[1, ], newdata, newdata[nrow(newdata), ], newdata[1, ])
+                             newdata[c(1, nrow(newdata) - 1, nrow(newdata)), "x"] <- round(newdata[1, "x"])
+                             
+                             if (length(draw_quantiles) > 0 & !scales::zero_range(range(data$y))) {
+                               stopifnot(all(draw_quantiles >= 0), all(draw_quantiles <=
+                                                                         1))
+                               quantiles <- ggplot2:::create_quantile_segment_frame(data, draw_quantiles)
+                               aesthetics <- data[rep(1, nrow(quantiles)), setdiff(names(data), c("x", "y")), drop = FALSE]
+                               aesthetics$alpha <- rep(1, nrow(quantiles))
+                               both <- cbind(quantiles, aesthetics)
+                               quantile_grob <- GeomPath$draw_panel(both, ...)
+                               ggplot2:::ggname("geom_split_violin", grid::grobTree(GeomPolygon$draw_panel(newdata, ...), quantile_grob))
+                             }
+                             else {
+                               ggplot2:::ggname("geom_split_violin", GeomPolygon$draw_panel(newdata, ...))
+                             }
+                           })
+
+geom_split_violin <- function(mapping = NULL, data = NULL, stat = "ydensity", position = "identity", ..., 
+                              draw_quantiles = NULL, trim = TRUE, scale = "area", na.rm = FALSE, 
+                              show.legend = NA, inherit.aes = TRUE) {
+  layer(data = data, mapping = mapping, stat = stat, geom = GeomSplitViolin, 
+        position = position, show.legend = show.legend, inherit.aes = inherit.aes, 
+        params = list(trim = trim, scale = scale, draw_quantiles = draw_quantiles, na.rm = na.rm, ...))
+}
+
+################################################
+inspect_pathway <- function(pathway_to_check, tissue, tissue_col){
+  index <- which(number_count$wpid == pathway_to_check)
+  total_protein <- number_count[index,2]
+  measured_protein <- number_count[index,(tissue+2)]
+  pathway_data <- data.frame(all_pathway[which(all_pathway$wpid == pathway_to_check),],
+                             NC_all_pathway[which(NC_all_pathway$wpid == pathway_to_check),])
+  up_protein <- which(pathway_data[,tissue+3] > pathway_data[,tissue+19])
+  down_protein <- which(pathway_data[,tissue+3] < pathway_data[,tissue+19])
+  
+  tissue_dif_data <- cbind(dif_data$Uniprot.ID, dif_data$Gene.name, dif_data[,tissue_col])
+  colnames (tissue_dif_data) <- c("Uniprot.ID", "Gene.name", "log2FC", "pvalue", "adjusted_pvalue")
+  check_genes <- intersect(tissue_dif_data$Uniprot.ID, pathway_data$Uniprot.ID)
+  not_in_log2fc <- setdiff(pathway_data$Uniprot.ID, tissue_dif_data$Uniprot.ID)
+  
+  significant_data <- tissue_dif_data[which(abs(as.numeric(tissue_dif_data$log2FC))>1.2 & as.numeric(tissue_dif_data$adjusted_pvalue) < 0.05),]
+  sig_genes <- intersect(significant_data$Uniprot.ID, pathway_data$Uniprot.ID)
+  sig_gene_names <- intersect(significant_data$Gene.name, pathway_data$Gene.name)
+  
+  print(paste(pathway_to_check, "has a total of", total_protein, "protein"))
+  print(paste("of which", measured_protein, " proteins are detected"))
+  print(paste(length(up_protein), "proteins are up in COVID"))
+  print(paste(length(down_protein), "proteins are down in COIVD"))
+  print(paste("there are", length(check_genes), "proteins in log2FC data"))
+  print("these proteins are not in the log2FC data")
+  print(not_in_log2fc)
+  print(paste(length(unique(significant_data$Uniprot.ID)), "proteins are significantly different in", tissue_df$tissue[tissue]))
+  print(paste(length(sig_genes), "significant proteins in", pathway_to_check))
+  print("they are")
+  print(sig_genes)
+  print("gene names")
+  print(sig_gene_names)
+}

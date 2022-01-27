@@ -76,8 +76,30 @@ NC_pathway_median <- P_median_per_tissue(NC_measured_pathways, tissue_df)
 # plot_pathway(NC_pathway_median,tissue_df,savename, levels = c("testi","kidney","spleen","liver","heart","lung","thyroid"))
 
 ## Compare COVID vs NonCOVID
+# Violin plot 
+covid_pathway <- data.frame(pathway_median$uP,stack(pathway_median[,2:8]))
+ncovid_pathway <- data.frame(NC_pathway_median$uP, stack(NC_pathway_median[,2:8]))
 
-# any pathway in COVID but not in nonCOVID
+new_data <- covid_pathway[,2:3]
+new_data$group <- 'covid'    
+
+nc_new_data <- ncovid_pathway[,2:3]
+nc_new_data$group <-'noncovid'
+violin_data <- rbind(new_data, nc_new_data)
+
+levels = c("thyroid", "lung", "heart", "liver", "spleen","kidney","testi")
+violin_data$ind<- factor(violin_data$ind, levels)
+
+ggplot(violin_data, aes(ind,values, fill = group)) + geom_split_violin() + 
+  labs(title = "Tissue-specific pathway activities in COVID-19 patients", x = "Tissue", y = "Median")+ 
+  theme_bw(base_size = 30) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+
+
+plots <- VlnPlot(object = violin_data, features = violin_data$ind, split.by = "group", group.by = "active.ident", pt.size = 0, combine = FALSE, log=T)
+
+
+# check if there is any pathway in COVID but not in nonCOVID
 setdiff(pathway_median$uP, NC_pathway_median$uP) # "WP4300" "WP2363" "WP4483" "WP382"  "WP2817" "WP268" 
 
 difference <- data.frame()
@@ -95,7 +117,7 @@ for (i in 1: length(pathway_median[,1])){
 
 difference <- data.frame(pathway_median[,1], difference)
 
-# count gene measured 
+# count gene measured per pathway in COVID patients
 uP <- prot_measured_per_pathway (measured_pathways,n,m1,m2)
 nC_uP <- prot_measured_per_pathway (NC_measured_pathways,n,m1,m2)
 
@@ -110,7 +132,7 @@ NC_percent_count <- as.data.frame(nC_uP[[2]])
 NC_percent_count[,c(3:ncol(NC_number_count))] <- sapply(NC_percent_count[,c(3:ncol(NC_number_count))], as.numeric)
 
 
-# replace number to NA for pathway with less than 30% and 3 genes measured in difference
+# replace number to NA for pathway with less than 30% and 3 genes measured. These pathways are not used for further analysis
 tol = 0.3 # 30% measured genes cutoff
 tol2 = 3 # at least 3 genes measured
 
@@ -234,33 +256,31 @@ setdiff(active_list$wpid, all_active_p$wpid)
 
 # heatmap
 
-# mtrx <- matrix(unlist(active_list[,2:8]),nrow= nrow(active_list), ncol = 7)
-# colnames(mtrx) <- colnames(active_list[,2:8])
-
-mtrx <- matrix(unlist(all_active_p[,2:8]),nrow= nrow(all_active_p), ncol = 7)
-colnames(mtrx) <- colnames(all_active_p[,2:8])
-
+# concrete colors
+# mtrx <- matrix(unlist(all_active_p[,2:8]),nrow= nrow(all_active_p), ncol = 7)
+# colnames(mtrx) <- colnames(all_active_p[,2:8])
+# 
 # png(paste("Figs/", date(), "heat_map_changed_pathways.png"), res = 300)
 # 
 # my_color <- c("#002992",'#ADD8E6','#920000')
 # 
 # heatmap.2(mtrx, na.color = 'grey', distfun = dist_no_na, col = my_color,
-#           breaks = c(min(mtrx,na.rm=TRUE),-0.1,0.1,max(mtrx,na.rm = TRUE)), 
+#           breaks = c(min(mtrx,na.rm=TRUE),-0.1,0.1,max(mtrx,na.rm = TRUE)),
 #           trace = "none", labRow = FALSE, )
 # dev.off()
+# 
 
-
-## gradients
+# gradient colors
 stack_data2 <- data.frame(all_active_p$wpid, stack(all_active_p[2:8]))
 rank_data2 <- stack_data2[order(-stack_data2[,2]),]
 rank_data2 <- na.omit(rank_data2)
 breaks = seq(min(rank_data2$values), max(rank_data2$values), length.out= length(rank_data2$values))
 
 # define colors within zones
-gradient1 <- colorpanel(sum(breaks[-1] < -0.1), "#002992", "#51a7db" )
-gradient2 <- colorpanel(sum(breaks[-1] >= -0.1 & breaks[-1] <= 0), "#51a7db", "#ffffff")
-gradient3 <- colorpanel(sum(breaks[-1] > 0 & breaks[-1] <=0.1), "#ffffff" , "#db8151")
-gradient4 <- colorpanel(sum(breaks[-1] > 0.1), "#db8151", '#920000')
+gradient1 <- colorpanel(sum(breaks[-1] < -0.1), "#002992", "#51a7db" ) # down regulated pathways
+gradient2 <- colorpanel(sum(breaks[-1] >= -0.1 & breaks[-1] <= 0), "#51a7db", "#ffffff") # no change pathways
+gradient3 <- colorpanel(sum(breaks[-1] > 0 & breaks[-1] <=0.1), "#ffffff" , "#db8151") # no change pathways
+gradient4 <- colorpanel(sum(breaks[-1] > 0.1), "#db8151", '#920000') # upregulated pathways
 
 hm.colors = c(gradient1, gradient2, gradient3, gradient4)
 
@@ -278,7 +298,7 @@ bottom_blue <- all_active_p$wpid[bottom]
 down_blue <- filter(all_pathway,wpid %in%bottom_blue)
 unique(down_blue$name)
 
-## rank overlap degree
+## rank overlap degree to identify pathways that change in the most tissues
 active_list$rank <- rowSums(!is.na(active_list[,2:8]))
 active_list[order(-active_list$rank),]
 
@@ -311,7 +331,7 @@ colnames(down_table) <- c("down pathway", "name", "tissue")
 # write_csv(as.data.frame(down_table),paste(date(),'most_down_pathways'))
 
 
-## generate visualization for changed pathways in each tissue
+## generate visualization for changed pathways in each tissue. Cytoscape needs to be opened in advance
 for (i in 1: length(tissue_df$tissue)){
   print (tissue_df$tissue[i])
   index <- which(!is.na(active_list[,i+1]))
@@ -342,12 +362,12 @@ for (i in 1: length(tissue_df$tissue)){
   exportImage(filename,'SVG')
   exportImage(filename,'PNG', zoom = 500)
   saveSession(filename) 
-  # RCy3::closeSession(save.before.closing = F)
+  RCy3::closeSession(save.before.closing = F)
     }
   }
 }
 
-# write file for each tissue
+# write change pathways into file for each tissue
 
 for (i in 1:length(tissue_df$tissue)){
   print(tissue_df$tissue)
@@ -382,40 +402,6 @@ thyroid <- c(24,25,26)
 
 
 ## check number of proteins measured per pathway and number of protein that are up and down per pathway
-
-
-inspect_pathway <- function(pathway_to_check, tissue, tissue_col){
-  index <- which(number_count$wpid == pathway_to_check)
-  total_protein <- number_count[index,2]
-  measured_protein <- number_count[index,(tissue+2)]
-  pathway_data <- data.frame(all_pathway[which(all_pathway$wpid == pathway_to_check),],
-                             NC_all_pathway[which(NC_all_pathway$wpid == pathway_to_check),])
-  up_protein <- which(pathway_data[,tissue+3] > pathway_data[,tissue+19])
-  down_protein <- which(pathway_data[,tissue+3] < pathway_data[,tissue+19])
-  
-  tissue_dif_data <- cbind(dif_data$Uniprot.ID, dif_data$Gene.name, dif_data[,tissue_col])
-  colnames (tissue_dif_data) <- c("Uniprot.ID", "Gene.name", "log2FC", "pvalue", "adjusted_pvalue")
-  check_genes <- intersect(tissue_dif_data$Uniprot.ID, pathway_data$Uniprot.ID)
-  not_in_log2fc <- setdiff(pathway_data$Uniprot.ID, tissue_dif_data$Uniprot.ID)
-  
-  significant_data <- tissue_dif_data[which(abs(as.numeric(tissue_dif_data$log2FC))>1.2 & as.numeric(tissue_dif_data$adjusted_pvalue) < 0.05),]
-  sig_genes <- intersect(significant_data$Uniprot.ID, pathway_data$Uniprot.ID)
-  sig_gene_names <- intersect(significant_data$Gene.name, pathway_data$Gene.name)
-  
-  print(paste(pathway_to_check, "has a total of", total_protein, "protein"))
-  print(paste("of which", measured_protein, " proteins are detected"))
-  print(paste(length(up_protein), "proteins are up in COVID"))
-  print(paste(length(down_protein), "proteins are down in COIVD"))
-  print(paste("there are", length(check_genes), "proteins in log2FC data"))
-  print("these proteins are not in the log2FC data")
-  print(not_in_log2fc)
-  print(paste(length(unique(significant_data$Uniprot.ID)), "proteins are significantly different in", tissue_df$tissue[tissue]))
-  print(paste(length(sig_genes), "significant proteins in", pathway_to_check))
-  print("they are")
-  print(sig_genes)
-  print("gene names")
-  print(sig_gene_names)
-  }
 
 pathway_to_check <- "WP3599"
 all_pathway$name[which(all_pathway$wpid == pathway_to_check)][1]
@@ -481,7 +467,7 @@ active_p <- data.frame(active_p$wpid, active_p$name)
 active_p <- unique(active_p)
 write_csv(active_p,"Results/all_changed_pathways")
 
-# Check pathways of intestest
+# Check pathways of interest
 gene <- "IL6ST"
 dif_data[which(dif_data$Gene.name == gene),] 
 index <- which(all_pathway$Gene.name == gene)
@@ -505,20 +491,5 @@ ggplot(data = pathway_data, aes(x = Gene.name)) +
 
 
 
-tissue_data <- data.frame(pathway_data[,1:3], pathway_data[,(i+3)],pathway_data[,11:19], pathway_data[,(i+19)], pathway_data[,27:31])
-data.frame(tissue_data$liver, tissue_data$liver.1)
-check_columns <- c(tissue_df$tissue[i],gsub(" ","",paste(tissue_df$tissue[i], ".1")))
-colnames(tissue_data)[4] <- check_columns[1]
-colnames(tissue_data)[14] <- check_columns[2]
-RCy3::commandsRun(paste('wikipathways import-as-pathway id=', pathway_to_check)) 
-toggleGraphicsDetails()
-loadTableData(pathway_data, data.key.column = "ENSEMBL", table.key.column = "Ensembl")
-setNodeCustomBarChart(check_columns, type = "GROUPED", colors = c("red","blue"), orientation = "HORIZONTAL", style.name = "WikiPathways")
-# Saving output
-path <- gsub(" ","",paste("Figs/",tissue_df$tissue[i]))
-dir.create(path)
-filename <- gsub(" ","",paste(path, "/",pathway_to_check))
-exportImage(filename,'SVG')
-exportImage(filename,'PNG', zoom = 500)
-saveSession(filename) 
+
 
