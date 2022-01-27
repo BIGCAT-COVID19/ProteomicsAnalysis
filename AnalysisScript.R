@@ -17,8 +17,10 @@ library(purrr)
 library(gplots)
 library(matrixStats)
 
-# Load functions
+## Load functions
 source("MultiOrganProteomicFunc.R")
+
+## Step 1. Load data, calculate protein mean and pathway median
 # Define tissues
 tissue_df <- data.frame(tissue = c("lung","spleen","liver","heart","kidney","testi","thyroid")) #renal medulla and cortex are grouped to kidney
 
@@ -44,7 +46,7 @@ dm_file <- "Data/COVID19_DiseaseMap_June2021.gmt"
 pwys <- c("WP4936","WP5020","WP5021","WP5035") # extra pathways in wikipathways covid portal but not in the gmt file
 all_pathway <- pathway_ID(ProteinMean[1], wp_file, dm_file, pwys)
 
-## Statistic
+## Statistic results
 n <-  length(tissue_df$tissue)
 m1 <- 4 # (the first tissue column in all_pathway)
 m2 <- 10 # (the last tissue column in all_pathway)
@@ -75,8 +77,8 @@ NC_measured_pathways <- tol_measured_pathway(NC_all_pathway,n,m1,m2,tol1,tol2)
 NC_pathway_median <- P_median_per_tissue(NC_measured_pathways, tissue_df)
 # plot_pathway(NC_pathway_median,tissue_df,savename, levels = c("testi","kidney","spleen","liver","heart","lung","thyroid"))
 
-## Compare COVID vs NonCOVID
-# Violin plot 
+## Step 2. Compare pathway median between COVID and NonCOVID
+# Make Violin plot of pathway median
 covid_pathway <- data.frame(pathway_median$uP,stack(pathway_median[,2:8]))
 ncovid_pathway <- data.frame(NC_pathway_median$uP, stack(NC_pathway_median[,2:8]))
 
@@ -94,13 +96,8 @@ ggplot(violin_data, aes(ind,values, fill = group)) + geom_split_violin() +
   labs(title = "Tissue-specific pathway activities in COVID-19 patients", x = "Tissue", y = "Median")+ 
   theme_bw(base_size = 30) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 
-
-
-plots <- VlnPlot(object = violin_data, features = violin_data$ind, split.by = "group", group.by = "active.ident", pt.size = 0, combine = FALSE, log=T)
-
-
 # check if there is any pathway in COVID but not in nonCOVID
-setdiff(pathway_median$uP, NC_pathway_median$uP) # "WP4300" "WP2363" "WP4483" "WP382"  "WP2817" "WP268" 
+setdiff(pathway_median$uP, NC_pathway_median$uP) 
 
 difference <- data.frame()
 for (i in 1: length(pathway_median[,1])){
@@ -191,7 +188,8 @@ row.names(active_table) <- c('up','down')
 
 
 # Plot
-svg(paste(date(),"multiplot_up_down.svg"))
+dir.create("Figs")
+svg(paste("Figs/",date(),"multiplot_up_down.svg"))
 layout(matrix(c(1,1,2,3,4,5,6,7,8), nrow = 3, ncol = 3, byrow = TRUE))
 plotdata <- data.matrix(active_table)
 barplot(plotdata, main = "The number of up- and down- regulated pathways in COVID19 patients", xlab = 'Tissue',
@@ -255,9 +253,9 @@ colnames(all_active_p) <- c('wpid',tissue_df$tissue)
 setdiff(active_list$wpid, all_active_p$wpid)
 
 # heatmap
+mtrx <- matrix(unlist(all_active_p[,2:8]),nrow= nrow(all_active_p), ncol = 7)
 
 # concrete colors
-# mtrx <- matrix(unlist(all_active_p[,2:8]),nrow= nrow(all_active_p), ncol = 7)
 # colnames(mtrx) <- colnames(all_active_p[,2:8])
 # 
 # png(paste("Figs/", date(), "heat_map_changed_pathways.png"), res = 300)
@@ -327,10 +325,11 @@ for (i in 49:58){
 }
 
 colnames(down_table) <- c("down pathway", "name", "tissue")
-# write_csv(as.data.frame(up_table),paste(date(),'most_up_pathways'))
-# write_csv(as.data.frame(down_table),paste(date(),'most_down_pathways'))
+write_csv(as.data.frame(up_table),paste(date(),'most_up_pathways'))
+write_csv(as.data.frame(down_table),paste(date(),'most_down_pathways'))
 
 
+## Step 3. Visualization 
 ## generate visualization for changed pathways in each tissue. Cytoscape needs to be opened in advance
 for (i in 1: length(tissue_df$tissue)){
   print (tissue_df$tissue[i])
@@ -349,6 +348,7 @@ for (i in 1: length(tissue_df$tissue)){
   RCy3::commandsRun(paste('wikipathways import-as-pathway id=', pathway_to_check)) 
   toggleGraphicsDetails()
   loadTableData(pathway_data, data.key.column = "ENSEMBL", table.key.column = "Ensembl")
+
  # write_csv(pathway_data,paste(gsub(" ","", paste("Figs/", tissue_df$tissue[i], "/")),date(),pathway_to_check, tissue_df$tissue[i], ".csv"))
   # setNodeLabelMapping("SYMBOL")
   # heatmap_colors <- c('red', 'yellow', 'blue','grey')
@@ -384,6 +384,7 @@ write_csv(table,paste(gsub(" ","", paste("Figs/", tissue_df$tissue[i], "/")),dat
 
 }
 
+## Step 4. Combine with differential expression data (e.g. log2FC, p value)
 
 ## Check log2FC, p value to identify significant difference
 
@@ -421,15 +422,15 @@ which(all_pathway$Uniprot.ID == not_in_wiki[2])
 gene_list <- unique(pathway_data$Uniprot.ID)
 filter(dif_data, Uniprot.ID %in% gene_list[!is.na(gene_list)])
 
-## Network of all changed pathways 
+## Create network of all changed pathways 
 
 changed_pathways <- filter(all_pathway,wpid %in% active_list$wpid)
 dir.create("Results")
 index <- !is.na(changed_pathways$Uniprot.ID)
 node_list <- data.frame(changed_pathways$Uniprot.ID[index], changed_pathways$wpid[index])
-write_csv(node_list, "Results/node_list")
-cys_table <- read.csv("Results/node_list_cytoscape_table.csv")
+write_csv(node_list, "Results/node_list") # create network in cytoscape from this file
 
+# prepare table data to load to the network in cytoscape
 pathway_list <- unique(changed_pathways$wpid) 
 database <- data.frame(matrix(,ncol = 1, nrow = length(pathway_list)))
 change_dif <- data.frame(matrix(,ncol = 7, nrow = length(pathway_list)))
@@ -451,10 +452,10 @@ for (i in 1:length(pathway_list)){
 
 all_table <- data.frame(pathway_list, database,change_dif)
 colnames(all_table)[1:2] <- c("wpid","database")
-write_csv(all_table,"Results/all_pathways_with_dif.csv")
+write_csv(all_table,"Results/all_pathways_with_dif.csv") # load this table data to the network and adjust visualization
 
 
-# network of changed pathways in each tissue
+## network of changed pathways in tissue of interest
 testi_p <- active_list$wpid[!is.na(active_list$testi)]
 testi_p_data <- filter(all_pathway,wpid %in% testi_p)
 index <- !is.na(testi_p_data$Uniprot.ID)

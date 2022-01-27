@@ -477,6 +477,17 @@ geom_split_violin <- function(mapping = NULL, data = NULL, stat = "ydensity", po
 }
 
 ################################################
+# Inspect individual pathway
+# # Input
+# - wikipathways ID of the pathway of interest, e.g. "WP123"
+# - tissue: the index of tissue of interest in tissue_df
+# - tissue_col: index of tissue in differential data which is predefined in the main analysis script as lung <- c(3,4,5)
+# Output
+#   - the total number of protein in the pathway
+#   - # detected proteins
+#   - # up protein
+#   - # down protein
+#   - # protein with significant expression data
 inspect_pathway <- function(pathway_to_check, tissue, tissue_col){
   index <- which(number_count$wpid == pathway_to_check)
   total_protein <- number_count[index,2]
