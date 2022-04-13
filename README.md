@@ -1,11 +1,15 @@
-# ProteomicsAnalysis
-Pathway activities analysis with multi-organ proteomics. Data were downloaded from Nie X. et al (2021) DOI: 10.1016/j.cell.2021.01.004  
+#Proteomics analysis
 
+Pathway activities in 7 tissues are analyzed using proteomics data obtained from Nie, Xiu, et al. "Multi-organ proteomic landscape of COVID-19 autopsies." Cell 184.3 (2021): 775-791.
 Author: Nhung Pham April 2022
 
-The main analysis script (WilcoxonAnalysis.R) contains R code to conduct protein mean calculation, pathway mapping to WikiPathways and the COVID-19 Disease Map,
-Wilcoxon rank test, effect size and differences calculation; and result analysis 
+#Code structure:
 
-The "MultiorganProteomicFunction" contain in-house functions needed for the analysis
-All the data needed to regenarate the result from the paper are in the data folder. 
+    Data folder contains proteomics data, wikipathways and COVID19 Disease Map GMT files that are needed for the analysis
+    "MultiOrganProteomicFunction.R" contains custom-made functions that needed for the analysis
+    "WilcoxonAnalysisScript.R" is the master script for the analysis
 
+#How to run:
+
+    Download the code and the Data folder
+    Follow the steps in the "WilcoxonAnalysisScript.R" to recreate the result in the paper
