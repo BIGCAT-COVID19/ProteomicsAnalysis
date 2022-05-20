@@ -12,4 +12,4 @@ Author: Nhung Pham April 2022
 # How to run:
 
     Download the code and the Data folder
-    Follow the steps in the "WilcoxonAnalysisScript.R" to recreate the result in the paper
+    Follow the steps in the "WilcoxonTissueAnalysis.R" to recreate the result in the paper
