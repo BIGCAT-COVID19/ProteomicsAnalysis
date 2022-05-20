@@ -7,7 +7,7 @@ Author: Nhung Pham April 2022
 
     Data folder contains proteomics data, wikipathways and COVID19 Disease Map GMT files that are needed for the analysis
     "MultiOrganProteomicFunction.R" contains custom-made functions that needed for the analysis
-    "WilcoxonAnalysisScript.R" is the master script for the analysis
+    "WilcoxonTissueAnalysis.R" is the master script for the analysis
 
 # How to run:
 
