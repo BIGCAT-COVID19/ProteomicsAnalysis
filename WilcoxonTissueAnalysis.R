@@ -178,25 +178,14 @@ liver_limit <- filter(liver, pathway %in% liver_tol)
 testi_tol <- percent_prot$wpid[which(as.numeric(number_prot$testi) >3 & as.numeric(percent_prot$testi) >0.3)]
 testi_limit <- filter(testi, pathway %in% testi_tol)
 
-# write to file
-
-write_csv(testi_limit,"Results/testi_Changed.csv")
-write_csv(liver_limit,"Results/liver_Changed.csv")
-write_csv(lung_limit,"Results/lung_Changed.csv")
-write_csv(heart_limit,"Results/heart_Changed.csv")
-write_csv(thyroid_limit,"Results/thyroid_Changed.csv")
-write_csv(spleen_limit,"Results/spleen_Changed.csv")
-write_csv(kidney_limit,"Results/kidney_Changed.csv")
-
-
 # extract the most significant changed pathways per tissue. pval < 0.05 and effect size > 0.3 or magnitude > 1
-top_kidney <- kidney[which(kidney_limit$magnitude >1),]
-top_lung <- lung[which(lung_limit$magnitude >1),]
-top_liver <- liver[which(liver_limit$magnitude >1),]
-top_spleen <- spleen[which(spleen_limit$magnitude >1),]
-top_heart <- heart[which(heart_limit$magnitude >1),]
-top_testi <- testi[which(testi_limit$magnitude >1),]
-top_thyroid <- thyroid[which(thyroid_limit$magnitude >1),]
+top_kidney <- kidney_limit[which(kidney_limit$magnitude >1),]
+top_lung <- lung_limit[which(lung_limit$magnitude >1),]
+top_liver <- liver_limit[which(liver_limit$magnitude >1),]
+top_spleen <- spleen_limit[which(spleen_limit$magnitude >1),]
+top_heart <- heart_limit[which(heart_limit$magnitude >1),]
+top_testi <- testi_limit[which(testi_limit$magnitude >1),]
+top_thyroid <- thyroid_limit[which(thyroid_limit$magnitude >1),]
 
 # create a matrix with all significant changed pathways with their values (p_value, effect size, maginitude, difference) in each tissue
 all_sig_p <- cbind(top_kidney$pathway, top_liver$pathway, top_lung$pathway, top_thyroid$pathway,
@@ -208,59 +197,59 @@ colnames(matrix) <- tissue_df$tissue
 
 for (i in 1:length(all_sig_p)){
   # lung
-  lung_index <- which(lung$pathway == all_sig_p[i])
+  lung_index <- which(lung_limit$pathway == all_sig_p[i])
   if (is_empty(lung_index)) { matrix$lung [i] <- NA} else {
-    if (lung$difference[lung_index] > 0) { 
-      matrix$lung [i] <- lung$effec_size[lung_index]
-    } else { matrix$lung [i] <- lung$effec_size[lung_index] * -1}
+    if (lung_limit$difference[lung_index] > 0) { 
+      matrix$lung [i] <- lung_limit$effec_size[lung_index]
+    } else { matrix$lung [i] <- lung_limit$effec_size[lung_index] * -1}
   }
   
   # liver
-  liver_index <- which(liver$pathway == all_sig_p[i])
+  liver_index <- which(liver_limit$pathway == all_sig_p[i])
   if (is_empty(liver_index)) { matrix$liver [i] <- NA} else {
-    if (liver$difference[liver_index] > 0) { 
-      matrix$liver [i] <- liver$effec_size[liver_index]
-    } else { matrix$liver [i] <- liver$effec_size[liver_index] * -1}
+    if (liver_limit$difference[liver_index] > 0) { 
+      matrix$liver [i] <- liver_limit$effec_size[liver_index]
+    } else { matrix$liver [i] <- liver_limit$effec_size[liver_index] * -1}
   }
   
   # spleen
-  spleen_index <- which(spleen$pathway == all_sig_p[i])
+  spleen_index <- which(spleen_limit$pathway == all_sig_p[i])
   if (is_empty(spleen_index)) { matrix$spleen [i] <- NA} else {
-    if (spleen$difference[spleen_index] > 0) { 
-      matrix$spleen [i] <- spleen$effec_size[spleen_index]
-    } else { matrix$spleen [i] <- spleen$effec_size[spleen_index] * -1}
+    if (spleen_limit$difference[spleen_index] > 0) { 
+      matrix$spleen [i] <- spleen_limit$effec_size[spleen_index]
+    } else { matrix$spleen [i] <- spleen_limit$effec_size[spleen_index] * -1}
   }
   
   # heart
-  heart_index <- which(heart$pathway == all_sig_p[i])
+  heart_index <- which(heart_limit$pathway == all_sig_p[i])
   if (is_empty(heart_index)) { matrix$heart [i] <- NA} else {
-    if (heart$difference[heart_index] > 0) { 
-      matrix$heart [i] <- heart$effec_size[heart_index]
-    } else { matrix$heart [i] <- heart$effec_size[heart_index] * -1}
+    if (heart_limit$difference[heart_index] > 0) { 
+      matrix$heart [i] <- heart_limit$effec_size[heart_index]
+    } else { matrix$heart [i] <- heart_limit$effec_size[heart_index] * -1}
   }
   
   # testi
-  testi_index <- which(testi$pathway == all_sig_p[i])
+  testi_index <- which(testi_limit$pathway == all_sig_p[i])
   if (is_empty(testi_index)) { matrix$testi [i] <- NA} else {
-    if (testi$difference[testi_index] > 0) { 
-      matrix$testi [i] <- testi$effec_size[testi_index]
-    } else { matrix$testi [i] <- testi$effec_size[testi_index] * -1}
+    if (testi_limit$difference[testi_index] > 0) { 
+      matrix$testi [i] <- testi_limit$effec_size[testi_index]
+    } else { matrix$testi [i] <- testi_limit$effec_size[testi_index] * -1}
   }
   
   #thyroid
-  thyroid_index <- which(thyroid$pathway == all_sig_p[i])
+  thyroid_index <- which(thyroid_limit$pathway == all_sig_p[i])
   if (is_empty(thyroid_index)) { matrix$thyroid [i] <- NA} else {
-    if (thyroid$difference[thyroid_index] > 0) { 
-      matrix$thyroid [i] <- thyroid$effec_size[thyroid_index]
-    } else { matrix$thyroid [i] <- thyroid$effec_size[thyroid_index] * -1}
+    if (thyroid_limit$difference[thyroid_index] > 0) { 
+      matrix$thyroid [i] <- thyroid_limit$effec_size[thyroid_index]
+    } else { matrix$thyroid [i] <- thyroid_limit$effec_size[thyroid_index] * -1}
   }
   
   # kidney
-  kidney_index <- which(kidney$pathway == all_sig_p[i])
+  kidney_index <- which(kidney_limit$pathway == all_sig_p[i])
   if (is_empty(kidney_index)) { matrix$kidney [i] <- NA} else {
-    if (kidney$difference[kidney_index] > 0) { 
-      matrix$kidney [i] <- kidney$effec_size[kidney_index]
-    } else { matrix$kidney [i] <- kidney$effec_size[kidney_index] * -1}
+    if (kidney_limit$difference[kidney_index] > 0) { 
+      matrix$kidney [i] <- kidney_limit$effec_size[kidney_index]
+    } else { matrix$kidney [i] <- kidney_limit$effec_size[kidney_index] * -1}
   }
 }
 rownames(matrix) <- all_sig_p
@@ -310,13 +299,24 @@ for (i in 1:length(all_sig_p)){
 
 all_rank_order <- all_rank[order(-all_rank$abs_effect_size),]
 all_rank_order
-length(all_sig_p) # 55 out of 736 pathways that change significantly in at least 1 tissue
+length(all_sig_p) # 73 out of 736 pathways that change significantly in at least 1 tissue # 69?
 
 # Pathways that change in more than 2 tissues with effect size > 0.3
-top_p <- all_rank$sig_pathway[which(all_rank$abs_effect_size > 2)]
+top_p <- all_rank$sig_pathway[which(all_rank$abs_effect_size > 1)]
 top_change_p <- filter(all_pathway, wpid%in% top_p)
 unique(top_change_p$name)
 
+# write to table
+multi_tissue_p <- data.frame(matrix(NA, ncol = 9, nrow = length(top_p)))
+colnames(multi_tissue_p) <- c('wpid', 'name', tissue_df$tissue)
+for (i in 1:length(top_p)){
+  index <- which(all_sig_p == top_p[i])
+  multi_tissue_p[i, 3:9] <- matrix[index,]
+  multi_tissue_p[i,1] <- top_p[i]
+  multi_tissue_p[i,2] <- unique(all_pathway$name[which(all_pathway$wpid == top_p[i])])
+}
+
+write_csv(multi_tissue_p, 'Results/15_pathways_altered_in_more_than_1_tissue.csv')
 # bar plot for number of changed pathways per tissue
 
 result <- matrix(NA, ncol = 7, nrow = 2)
@@ -411,6 +411,16 @@ spleen_limit
 top_check <- spleen_limit[1:17,]
 top_check[which(top_check$difference <0),]
 
+# write to file
+
+write_csv(testi_limit,"Results/testi_Changed.csv")
+write_csv(liver_limit,"Results/liver_Changed.csv")
+write_csv(lung_limit,"Results/lung_Changed.csv")
+write_csv(heart_limit,"Results/heart_Changed.csv")
+write_csv(thyroid_limit,"Results/thyroid_Changed.csv")
+write_csv(spleen_limit,"Results/spleen_Changed.csv")
+write_csv(kidney_limit,"Results/kidney_Changed.csv")
+
 ## Analyze thyroid
 
 thyroid_name <- filter(all_pathway, wpid %in% thyroid$pathway[1:73])
@@ -455,7 +465,7 @@ for (i in 1: length(tissue_df$tissue)){
       pathway_data <- data.frame(all_pathway_mean[which(all_pathway_mean$wpid == pathway_to_check),],
                                  NC_all_pathway_mean[which(NC_all_pathway_mean$wpid == pathway_to_check),])
       check_columns <- c(tissue_df$tissue[i],gsub(" ","",paste(tissue_df$tissue[i], ".1")))
-       RCy3::commandsRun(paste('wikipathways import-as-pathway id=', pathway_to_check))
+      RCy3::commandsRun(paste('wikipathways import-as-pathway id=', pathway_to_check))
       toggleGraphicsDetails()
       loadTableData(pathway_data, data.key.column = "ENSEMBL", table.key.column = "Ensembl")
       setNodeCustomBarChart(check_columns, type = "GROUPED", colors = c("red","blue"), orientation = "HORIZONTAL", style.name = "WikiPathways")
@@ -472,6 +482,7 @@ for (i in 1: length(tissue_df$tissue)){
 }
 
 # write change pathways into file for each tissue
+dir.create("Wilcoxon_Fig")
 
 for (i in 1:length(tissue_df$tissue)){
   print(tissue_df$tissue)
@@ -480,11 +491,11 @@ for (i in 1:length(tissue_df$tissue)){
   for (j in 1:length(index)){
     name <- all_pathway$name[which(all_pathway$wpid == all_sig_p[index[j]])]
     table [j,1] <- all_sig_p[index[j]]
-    table [j,3] <- name[1]
+    table [j,2] <- name[1]
     table [j,3] <- matrix[index[j],i]
   }
   colnames(table) <- c("id", "name", "difference")
-  write_csv(table,paste(gsub(" ","", paste("Wilcoxon_Fig/", tissue_df$tissue[i], "/")),Sys.Date(),"changed pathways in", tissue_df$tissue[i], ".csv"))
+  write_csv(table,paste("Wilcoxon_Fig/",Sys.Date(),"changed pathways in", tissue_df$tissue[i], ".csv"))
   
 }
 
@@ -524,8 +535,9 @@ write_csv(all_table,"Results/all_pathways_with_dif2.csv") # load this table data
 ## pathways that chnaged in literature
 
 lit <- c('WP4868', 'WP366', 'WP3333', 'WP3858', 'WP30360', 'WP400', 'WP364')
-which(all_sig_p == lit) # there is none
-
+for (i in 1:length(lit)){
+print(which(all_sig_p == lit[i])) # there is none
+}
 # inspect pathway of interest with differential expression data
 # load differential expression data
 dif_data <- read.csv('Data/mmc4_covidvsnoncovid.csv')

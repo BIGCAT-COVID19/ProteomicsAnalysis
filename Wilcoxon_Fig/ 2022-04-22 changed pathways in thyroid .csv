@@ -1,0 +1,51 @@
+id,name,difference
+WP5089,Kinin-Kallikrein pathway,-0.6883771728477851
+WP4153,"Degradation pathway of sphingolipids, including diseases",0.3095417525724345
+WP4815,Glycosaminoglycan degradation,0.4286909404552347
+WP5027,nsp1 from SARS-CoV-2 inhibits translation initiation in the host cell,0.42440846331598214
+WP3601,Lipid particles composition,-0.6058259757339429
+WP438,Non-homologous end joining,0.3247874230979633
+WP4920,Mitochondrial complex II assembly,0.3212653558571817
+WP4784,Proteoglycan biosynthesis,0.3060129441978306
+WP4804,Cholesterol biosynthesis with skeletal dysplasias,0.6056335489754701
+WP4723,Omega-3 / omega-6 fatty acid synthesis,0.5155941874863297
+WP2881,Estrogen receptor pathway,0.4920721323017064
+WP5109,Familial hyperlipidemia type 2,-0.4809361326777967
+WP4927,"COVID-19, thrombosis and anticoagulation",-0.47286637858213265
+MINERVA Virus replication cycle,MINERVA Virus replication cycle,0.4637832278685334
+WP5065,SARS-CoV-2 altering angiogenesis via NRP1,0.45784201142813996
+WP1941,Peroxisomal beta-oxidation of tetracosanoyl-CoA,0.4511083989494529
+WP4522,"Metabolic pathway of LDL, HDL and TG, including diseases",-0.45097566987861726
+WP4480,Altered glycosylation of MUC1 in tumor microenvironment,0.43690411222982267
+WP272,Blood clotting cascade,-0.40918027212055336
+WP4562,Canonical NF-kB pathway,0.4060360801154768
+WP430,Statin inhibition of cholesterol production,-0.40543391654456606
+MINERVA Coagulation pathway,MINERVA Coagulation pathway,-0.40466070638278034
+WP4240,Regulation of sister chromatid separation at the metaphase-anaphase transition,0.387996857473171
+WP1422,Sphingolipid pathway,0.38242691941985246
+WP4479,Supression of HMGB1 mediated inflammation by THBD,0.37005805555270344
+WP4788,Autosomal recessive osteopetrosis pathways,0.3648685068227395
+WP4146,Macrophage markers,0.36444626813105335
+WP4317,Mitochondrial fatty acid synthesis pathway,0.36153069798600496
+WP134,Pentose phosphate metabolism,-0.3581174238155248
+WP4324,Mitochondrial complex I assembly model OXPHOS system,0.3548077252259423
+WP4726,Sphingolipid metabolism: integrated pathway,0.35179311673706026
+WP4725,Sphingolipid metabolism overview,0.35179311673706026
+WP3963,Mevalonate pathway,-0.3480850350989955
+WP4846,SARS-CoV-2 and COVID-19 pathway,0.34637636879005845
+WP5110,Familial hyperlipidemia type 3,-0.34539510908736365
+WP5103,Progeria-associated lipodystrophy,0.3389624453453108
+WP3934,Leptin and adiponectin,0.3304704476642003
+WP4969,RAS and bradykinin pathways in COVID-19,-0.3293650858781276
+WP368,Mitochondrial long chain fatty acid beta-oxidation,0.3270586532316818
+WP229,Irinotecan pathway,0.3238961431206458
+MINERVA Nsp4 and Nsp6 protein interactions,MINERVA Nsp4 and Nsp6 protein interactions,0.3222648703954458
+WP206,Fatty acid omega-oxidation,0.31835042976387307
+WP623,Oxidative phosphorylation,0.31330539657620077
+WP4940,15q11.2 copy number variation syndrome,0.31215947157635365
+WP78,TCA cycle (aka Krebs or citric acid cycle),0.3108305505392123
+WP4970,Galanin receptor pathway,0.3093206860376204
+WP1424,Globo sphingolipid metabolism,0.30759313290206436
+WP2817,Mammary gland development pathway - Pregnancy and lactation (Stage 3 of 4),0.30720637444559395
+WP411,mRNA processing,0.302289708639058
+WP111,Electron transport chain: OXPHOS system in mitochondria,0.30081034445340904

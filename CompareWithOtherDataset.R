@@ -5,6 +5,10 @@
 library(rstatix)
 library(org.Hs.eg.db)
 library(rWikiPathways)
+library(RCy3)
+library(readr)
+
+source("MultiOrganProteomicFunction.R")
 # read the edit data
 
 blood_data <- data.frame(read_csv("Data/S-BSST416(1)/blood_proteomics_edit.csv"))
@@ -134,3 +138,41 @@ i = 1
           # i = 1 has 5 genes (15%) 
           # WP4868 reduce in mild and moderate, increase in severe
 
+## Cytoscape
+pathway_to_check <- "WP4868"
+          
+severe_p <- filter(severe_data, pathway.wpid %in% pathway_to_check)
+pathway_data <- data.frame(matrix(NA,ncol = 6 , nrow = length(severe_p$ENTREZID)))
+colnames(pathway_data) <- c("gene", "Ensemble", "control", "mild", "moderate", "severe")
+pathway_data$gene <- severe_p$uniprot
+ncol <- ncol(severe_data) - 4
+severe_p_data <- severe_p[,3:ncol]
+pathway_data$severe <- apply(severe_p_data,1, function(x){ ifelse(sum(!is.na(x))/ncol(severe_p_data) > 0.1, log10(mean(x, na.rm = TRUE)+1), NA)})
+
+control_p <- filter(control_data, pathway.wpid %in% pathway_to_check)
+ncontrol <- ncol(control_p) - 4
+control_p_data <- control_p[, 3:ncontrol]
+ pathway_data$control <- apply(control_p_data,1, function(x){ ifelse(sum(!is.na(x))/ncol(control_p_data) > 0.1, log10(mean(x, na.rm = TRUE)+1), NA)})
+
+mild_p <- filter(mild_data, pathway.wpid %in% pathway_to_check)
+nmild <- ncol(mild_p) - 4
+mild_p_data <- mild_p[, 3:nmild]
+pathway_data$mild <- apply(mild_p_data,1, function(x){ ifelse(sum(!is.na(x))/ncol(mild_p_data) > 0.1, log10(mean(x, na.rm = TRUE)+1), NA)})
+
+moderate_p <- filter(moderate_data, pathway.wpid %in% pathway_to_check)
+nmoderate <- ncol(moderate_p) - 4
+moderate_p_data <- moderate_p[, 3:nmoderate]
+pathway_data$moderate <- apply(moderate_p_data,1, function(x){ ifelse(sum(!is.na(x))/ncol(moderate_p_data) > 0.1, log10(mean(x, na.rm = TRUE)+1), NA)})
+
+pathway_data$Ensemble[2] <- 'ENSG00000213928'
+pathway_data$Ensemble[3] <- 'ENSG00000213928'
+pathway_data$Ensemble[4] <- 'ENSG00000107201'
+pathway_data$Ensemble[16] <- 'ENSG00000198001'
+pathway_data$Ensemble[21] <- 'ENSG00000130234'
+
+           
+RCy3::commandsRun(paste('wikipathways import-as-pathway id=', pathway_to_check))
+toggleGraphicsDetails()
+loadTableData(pathway_data, data.key.column = "Ensemble", table.key.column = "Ensembl")
+# setNodeCustomBarChart(check_columns, type = "GROUPED", colors = c("red","blue"), orientation = "HORIZONTAL", style.name = "WikiPathways")
+# Saving output
